@@ -1,0 +1,7 @@
+
+> whatsapp-clone-monorepo@1.0.0 dev:client
+> npm run dev --prefix client
+
+
+> whatsapp-clone-client@1.0.0 dev
+> vite
