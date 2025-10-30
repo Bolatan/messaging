@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck } from 'lucide-react';
 import io from 'socket.io-client';
+import AuthScreen from './AuthScreen';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
 const WhatsAppClone = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedChat, setSelectedChat] = useState(null);
   const [message, setMessage] = useState('');
@@ -73,36 +75,32 @@ const WhatsAppClone = () => {
   }, []);
 
   const initializeApp = async () => {
-    try {
-      // In production, you'd get this from login/auth
-      let user = JSON.parse(localStorage.getItem('currentUser'));
-      
-      if (!user) {
-        // Create a demo user
-        const response = await fetch(`${API_URL}/api/users`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'Demo User',
-            email: `demo${Date.now()}@example.com`,
-            password: 'demo123',
-            avatar: '👤'
-          })
-        });
-        user = await response.json();
-        localStorage.setItem('currentUser', JSON.stringify(user));
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        // You might want to verify the token with the backend here
+        const user = JSON.parse(localStorage.getItem('currentUser'));
+        if (user) {
+          setCurrentUser(user);
+          setIsLoggedIn(true);
+          socketRef.current?.emit('user:online', user.id);
+          await Promise.all([loadUsers(), loadChats(user.id)]);
+        }
+      } catch (error) {
+        console.error('Error initializing app:', error);
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
       }
-
-      setCurrentUser(user);
-      socketRef.current?.emit('user:online', user.id);
-
-      // Load users and chats
-      await Promise.all([loadUsers(), loadChats(user.id)]);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error initializing app:', error);
-      setLoading(false);
     }
+    setLoading(false);
+  };
+
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    setIsLoggedIn(true);
+    socketRef.current?.emit('user:online', user.id);
+    loadUsers();
+    loadChats(user.id);
   };
 
   const loadUsers = async () => {
@@ -275,7 +273,7 @@ const WhatsAppClone = () => {
     );
   }
 
-  return (
+  const MainApp = () => (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 bg-white border-r border-gray-200`}>
@@ -484,6 +482,8 @@ const WhatsAppClone = () => {
       </div>
     </div>
   );
+
+  return isLoggedIn ? <MainApp /> : <AuthScreen onLogin={handleLogin} />;
 };
 
 export default WhatsAppClone;
