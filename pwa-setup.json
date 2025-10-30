@@ -1,0 +1,83 @@
+// File: client/public/manifest.json
+{
+  "name": "WhatsApp Clone",
+  "short_name": "WhatsApp",
+  "description": "Real-time messaging application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#075e54",
+  "theme_color": "#075e54",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "communication"],
+  "shortcuts": [
+    {
+      "name": "New Chat",
+      "short_name": "New Chat",
+      "description": "Start a new conversation",
+      "url": "/?action=new",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
+
+// File: client/index.html - Add this in <head>
+{
+  "html_head": [
+    "<link rel=\"manifest\" href=\"/manifest.json\">",
+    "<meta name=\"theme-color\" content=\"#075e54\">",
+    "<meta name=\"apple-mobile-web-app-capable\" content=\"yes\">",
+    "<meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\">",
+    "<meta name=\"apple-mobile-web-app-title\" content=\"WhatsApp\">",
+    "<link rel=\"apple-touch-icon\" href=\"/icon-192.png\">"
+  ]
+}
+
+// File: client/public/sw.js (Service Worker for offline support)
+const CACHE_NAME = 'whatsapp-clone-v1';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/manifest.json'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(urlsToCache))
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request)
+      .then((response) => response || fetch(event.request))
+  );
+});
+
+// File: client/src/main.jsx - Add service worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => console.log('SW registered'))
+      .catch(err => console.log('SW registration failed'));
+  });
+}
