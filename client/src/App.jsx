@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck, User, Users } from 'lucide-react';
 import io from 'socket.io-client';
 import WebGLAnimation from './components/WebGLAnimation';
@@ -260,7 +260,7 @@ const WhatsAppClone = () => {
     return display.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!main.current) return;
     const ctx = gsap.context(() => {
       gsap.from('.chat-item', {
@@ -292,7 +292,7 @@ const WhatsAppClone = () => {
     );
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!main.current) return;
     const ctx = gsap.context(() => {
       gsap.from('.message-item', {
