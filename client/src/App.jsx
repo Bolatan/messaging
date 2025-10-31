@@ -293,6 +293,20 @@ const WhatsAppClone = () => {
     )
   );
 
+  useLayoutEffect(() => {
+    if (!main.current) return;
+    const ctx = gsap.context(() => {
+      gsap.from('.message-item', {
+        duration: 0.5,
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        ease: 'power3.out',
+      });
+    }, main);
+    return () => ctx.revert();
+  }, [messages]);
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-green-50">
@@ -302,10 +316,6 @@ const WhatsAppClone = () => {
         </div>
       </div>
     );
-  }
-
-  if (!currentUser) {
-    return <RegistrationForm onRegister={handleRegister} />;
   }
 
   return (
