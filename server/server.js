@@ -153,11 +153,11 @@ app.get('/api/users', async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
+const clientDistPath = path.resolve(__dirname, '..', 'client', 'dist');
 app.use(express.static(clientDistPath));
 
 app.get('*', (req, res) => {
-  const indexPath = path.join(clientDistPath, 'index.html');
+  const indexPath = path.resolve(clientDistPath, 'index.html');
   fs.access(indexPath, fs.constants.F_OK, (err) => {
     if (err) {
       res.status(404).send('index.html not found');
