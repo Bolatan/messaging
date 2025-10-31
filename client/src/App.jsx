@@ -308,6 +308,10 @@ const WhatsAppClone = () => {
     )
   );
 
+  const filteredAvailableUsers = availableUsers.filter(u =>
+    u.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-green-50">
@@ -345,11 +349,13 @@ const WhatsAppClone = () => {
         </div>
 
         {/* New Chats Section */}
-        {availableUsers.length > 0 && (
+        {(searchQuery ? filteredAvailableUsers.length > 0 : availableUsers.length > 0) && (
           <div className="bg-green-50 p-3">
-            <p className="text-xs text-green-800 font-semibold mb-2">START NEW GIST</p>
+            <p className="text-xs text-green-800 font-semibold mb-2">
+              {searchQuery ? 'SEARCH RESULTS' : 'START NEW GIST'}
+            </p>
             <div className="space-y-1">
-              {availableUsers.slice(0, 3).map(user => (
+              {(searchQuery ? filteredAvailableUsers : availableUsers).slice(0, 5).map(user => (
                 <div
                   key={user._id}
                   onClick={() => createOrOpenChat(user)}
