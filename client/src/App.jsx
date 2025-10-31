@@ -273,7 +273,7 @@ const WhatsAppClone = () => {
   });
 
   useLayoutEffect(() => {
-    if (!main.current) return;
+    if (!main.current || filteredChats.length === 0) return;
     const ctx = gsap.context(() => {
       gsap.from('.chat-item', {
         duration: 0.5,
