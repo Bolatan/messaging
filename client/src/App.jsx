@@ -235,16 +235,6 @@ const WhatsAppClone = () => {
     });
   }, [messages]);
 
-  useEffect(() => {
-    gsap.from('.chat-item', {
-      duration: 0.5,
-      opacity: 0,
-      y: 20,
-      stagger: 0.1,
-      ease: 'power3.out',
-    });
-  }, [filteredChats]);
-
   const getOtherParticipant = (chat) => {
     if (chat.isGroup) return null;
     return chat.participants?.find(p => p._id !== currentUser?.id);
@@ -275,6 +265,16 @@ const WhatsAppClone = () => {
     const display = getChatDisplay(chat);
     return display.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
+
+  useEffect(() => {
+    gsap.from('.chat-item', {
+      duration: 0.5,
+      opacity: 0,
+      y: 20,
+      stagger: 0.1,
+      ease: 'power3.out',
+    });
+  }, [filteredChats]);
 
   const availableUsers = users.filter(u => 
     u._id !== currentUser?.id &&
