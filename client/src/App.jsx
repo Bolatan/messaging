@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck, User, Users } from 'lucide-react';
 import io from 'socket.io-client';
-import WebGLAnimation from './components/WebGLAnimation';
 import RegistrationForm from './components/RegistrationForm';
-import { gsap } from 'gsap';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
@@ -107,8 +105,11 @@ const WhatsAppClone = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Registration failed.');
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
       }
 
       const user = await response.json();
@@ -123,6 +124,13 @@ const WhatsAppClone = () => {
   const loadUsers = async () => {
     try {
       const response = await fetch(`${API_URL}/api/users`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -133,6 +141,13 @@ const WhatsAppClone = () => {
   const loadChats = async (userId) => {
     try {
       const response = await fetch(`${API_URL}/api/chats/${userId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
       const data = await response.json();
       setChats(data);
     } catch (error) {
@@ -143,6 +158,13 @@ const WhatsAppClone = () => {
   const loadMessages = async (chatId) => {
     try {
       const response = await fetch(`${API_URL}/api/messages/${chatId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
       const data = await response.json();
       setMessages(data);
       
@@ -171,6 +193,13 @@ const WhatsAppClone = () => {
           isGroup: false
         })
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
       const chat = await response.json();
       
       if (!chats.find(c => c._id === chat._id)) {
@@ -272,40 +301,12 @@ const WhatsAppClone = () => {
     return display.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  useLayoutEffect(() => {
-    if (!main.current || filteredChats.length === 0) return;
-    const ctx = gsap.context(() => {
-      gsap.from('.chat-item', {
-        duration: 0.5,
-        opacity: 0,
-        y: 20,
-        stagger: 0.1,
-        ease: 'power3.out',
-      });
-    }, main);
-    return () => ctx.revert();
-  }, [filteredChats]);
-
   const availableUsers = users.filter(u => 
     u._id !== currentUser?.id &&
     !chats.some(chat => 
       !chat.isGroup && chat.participants?.some(p => p._id === u._id)
     )
   );
-
-  useLayoutEffect(() => {
-    if (!main.current) return;
-    const ctx = gsap.context(() => {
-      gsap.from('.message-item', {
-        duration: 0.5,
-        opacity: 0,
-        y: 20,
-        stagger: 0.1,
-        ease: 'power3.out',
-      });
-    }, main);
-    return () => ctx.revert();
-  }, [messages]);
 
   if (loading) {
     return (
@@ -320,7 +321,6 @@ const WhatsAppClone = () => {
 
   return (
     <div className="flex h-screen" ref={main}>
-      <WebGLAnimation />
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 bg-white border-r border-gray-200`}>
         {/* Header */}
