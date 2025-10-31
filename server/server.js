@@ -28,7 +28,8 @@ mongoose.connect(process.env.MONGODB_URI)
 // Schemas
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
+  email: { type: String, unique: true, sparse: true },
+  phoneNumber: { type: String, unique: true, sparse: true },
   password: { type: String, required: true },
   avatar: {
     type: String,
@@ -37,6 +38,14 @@ const userSchema = new mongoose.Schema({
   },
   online: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now }
+});
+
+userSchema.pre('save', function(next) {
+  if (!this.email && !this.phoneNumber) {
+    next(new Error('Either email or phone number is required.'));
+  } else {
+    next();
+  }
 });
 
 const messageSchema = new mongoose.Schema({
@@ -130,20 +139,27 @@ app.post('/api/chats', async (req, res) => {
 // Create/register a user
 app.post('/api/users', async (req, res) => {
   try {
-    const { name, email, password, avatar } = req.body;
-    
-    const existingUser = await User.findOne({ email });
+    const { name, email, phoneNumber, password, avatar } = req.body;
+
+    let existingUser;
+    if (email) {
+      existingUser = await User.findOne({ email });
+    } else if (phoneNumber) {
+      existingUser = await User.findOne({ phoneNumber });
+    }
+
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
-    const user = new User({ name, email, password, avatar });
+    const user = new User({ name, email, phoneNumber, password, avatar });
     await user.save();
     
     res.status(201).json({ 
       id: user._id, 
       name: user.name, 
-      email: user.email, 
+      email: user.email,
+      phoneNumber: user.phoneNumber,
       avatar: user.avatar 
     });
   } catch (error) {

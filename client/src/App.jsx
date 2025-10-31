@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck, User, Users } from 'lucide-react';
 import io from 'socket.io-client';
 import WebGLAnimation from './components/WebGLAnimation';
+import RegistrationForm from './components/RegistrationForm';
 import { gsap } from 'gsap';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -78,21 +79,10 @@ const WhatsAppClone = () => {
     try {
       // In production, you'd get this from login/auth
       let user = JSON.parse(localStorage.getItem('currentUser'));
-      
+
       if (!user) {
-        // Create a demo user
-        const response = await fetch(`${API_URL}/api/users`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: 'Demo User',
-            email: `demo${Date.now()}@example.com`,
-            password: 'demo123',
-            avatar: '🇳🇬'
-          })
-        });
-        user = await response.json();
-        localStorage.setItem('currentUser', JSON.stringify(user));
+        setLoading(false);
+        return;
       }
 
       setCurrentUser(user);
@@ -104,6 +94,28 @@ const WhatsAppClone = () => {
     } catch (error) {
       console.error('Error initializing app:', error);
       setLoading(false);
+    }
+  };
+
+  const handleRegister = async (registrationData) => {
+    try {
+      const response = await fetch(`${API_URL}/api/users`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(registrationData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Registration failed.');
+      }
+
+      const user = await response.json();
+      localStorage.setItem('currentUser', JSON.stringify(user));
+      await initializeApp();
+    } catch (error) {
+      console.error('Error registering user:', error);
+      // You might want to display this error to the user
     }
   };
 
@@ -292,6 +304,10 @@ const WhatsAppClone = () => {
         </div>
       </div>
     );
+  }
+
+  if (!currentUser) {
+    return <RegistrationForm onRegister={handleRegister} />;
   }
 
   return (
