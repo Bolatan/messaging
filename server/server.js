@@ -9,15 +9,33 @@ import { Server } from 'socket.io';
 
 const app = express();
 const httpServer = createServer(app);
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'http://localhost:5173',
+  'https://messaging-1-g74n.onrender.com'
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (
+      allowedOrigins.includes(origin) ||
+      !origin ||
+      /--messaging-1-g74n\.onrender\.com$/.test(origin)
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST'],
+  credentials: true
+};
+
 const io = new Server(httpServer, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
-    methods: ['GET', 'POST']
-  }
+  cors: corsOptions
 });
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // MongoDB Connection
