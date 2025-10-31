@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
@@ -5,6 +6,20 @@ const WebGLAnimation = () => {
   const mountRef = useRef(null);
 
   useEffect(() => {
+    const isWebGLAvailable = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      } catch (e) {
+        return false;
+      }
+    };
+
+    if (!isWebGLAvailable()) {
+      console.warn('WebGL not supported, falling back to no animation.');
+      return;
+    }
+
     const currentMount = mountRef.current;
 
     // Scene
@@ -15,15 +30,9 @@ const WebGLAnimation = () => {
     camera.position.z = 5;
 
     // Renderer
-    let renderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-      currentMount.appendChild(renderer.domElement);
-    } catch (error) {
-      console.warn('WebGL not supported, falling back to no animation.');
-      return;
-    }
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+    currentMount.appendChild(renderer.domElement);
 
     // Cube
     const geometry = new THREE.BoxGeometry(1, 1, 1);
