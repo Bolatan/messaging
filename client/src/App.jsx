@@ -281,17 +281,6 @@ const WhatsAppClone = () => {
     )
   );
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-green-50">
-        <div className="text-center">
-          <div className="w-16 h-16 mx-auto mb-4"><User className="w-full h-full text-gray-400" /></div>
-          <p className="text-gray-600">Loading NaijaChat...</p>
-        </div>
-      </div>
-    );
-  }
-
   useLayoutEffect(() => {
     if (!main.current) return;
     const ctx = gsap.context(() => {
@@ -305,6 +294,17 @@ const WhatsAppClone = () => {
     }, main);
     return () => ctx.revert();
   }, [messages]);
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-green-50">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4"><User className="w-full h-full text-gray-400" /></div>
+          <p className="text-gray-600">Loading NaijaChat...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen" ref={main}>
