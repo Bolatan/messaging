@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "npm i --prefix ../client && npm run build --prefix ../client",
+    "postinstall": "npm run build"
   },
   "dependencies": {
     "cors": "^2.8.5",
