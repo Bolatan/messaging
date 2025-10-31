@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck, User, Users } from 'lucide-react';
 import io from 'socket.io-client';
 import WebGLAnimation from './components/WebGLAnimation';
@@ -22,6 +22,7 @@ const WhatsAppClone = () => {
   const messagesEndRef = useRef(null);
   const socketRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const main = useRef();
 
   // Initialize socket connection
   useEffect(() => {
@@ -238,13 +239,6 @@ const WhatsAppClone = () => {
 
   useEffect(() => {
     scrollToBottom();
-    gsap.from('.message-item', {
-      duration: 0.5,
-      opacity: 0,
-      y: 20,
-      stagger: 0.1,
-      ease: 'power3.out',
-    });
   }, [messages]);
 
   const getOtherParticipant = (chat) => {
@@ -278,14 +272,18 @@ const WhatsAppClone = () => {
     return display.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  useEffect(() => {
-    gsap.from('.chat-item', {
-      duration: 0.5,
-      opacity: 0,
-      y: 20,
-      stagger: 0.1,
-      ease: 'power3.out',
-    });
+  useLayoutEffect(() => {
+    if (!main.current) return;
+    const ctx = gsap.context(() => {
+      gsap.from('.chat-item', {
+        duration: 0.5,
+        opacity: 0,
+        y: 20,
+        stagger: 0.1,
+        ease: 'power3.out',
+      });
+    }, main);
+    return () => ctx.revert();
   }, [filteredChats]);
 
   const availableUsers = users.filter(u => 
@@ -311,7 +309,7 @@ const WhatsAppClone = () => {
   }
 
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen" ref={main}>
       <WebGLAnimation />
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 bg-white border-r border-gray-200`}>

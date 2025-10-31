@@ -15,9 +15,15 @@ const WebGLAnimation = () => {
     camera.position.z = 5;
 
     // Renderer
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
-    currentMount.appendChild(renderer.domElement);
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(currentMount.clientWidth, currentMount.clientHeight);
+      currentMount.appendChild(renderer.domElement);
+    } catch (error) {
+      console.warn('WebGL not supported, falling back to no animation.');
+      return;
+    }
 
     // Cube
     const geometry = new THREE.BoxGeometry(1, 1, 1);
@@ -37,7 +43,9 @@ const WebGLAnimation = () => {
 
     // Cleanup
     return () => {
-      currentMount.removeChild(renderer.domElement);
+      if (renderer && currentMount && renderer.domElement.parentNode === currentMount) {
+        currentMount.removeChild(renderer.domElement);
+      }
     };
   }, []);
 
