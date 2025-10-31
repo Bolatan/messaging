@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck } from 'lucide-react';
+import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck, User, Users } from 'lucide-react';
 import io from 'socket.io-client';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
@@ -86,7 +86,7 @@ const WhatsAppClone = () => {
             name: 'Demo User',
             email: `demo${Date.now()}@example.com`,
             password: 'demo123',
-            avatar: '👤'
+            avatar: '🇳🇬'
           })
         });
         user = await response.json();
@@ -235,14 +235,14 @@ const WhatsAppClone = () => {
     if (chat.isGroup) {
       return {
         name: chat.groupName,
-        avatar: chat.groupAvatar || '👨‍👩‍👧‍👦',
+        avatar: <Users className="w-full h-full" />,
         online: false
       };
     }
     const other = getOtherParticipant(chat);
     return {
       name: other?.name || 'Unknown',
-      avatar: other?.avatar || '👤',
+      avatar: <User className="w-full h-full" />,
       online: other?.online || false
     };
   };
@@ -266,10 +266,10 @@ const WhatsAppClone = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-teal-50">
+      <div className="flex h-screen items-center justify-center bg-green-50">
         <div className="text-center">
-          <div className="text-6xl mb-4">💬</div>
-          <p className="text-gray-600">Loading WhatsApp...</p>
+          <div className="w-16 h-16 mx-auto mb-4"><User className="w-full h-full text-gray-400" /></div>
+          <p className="text-gray-600">Loading NaijaChat...</p>
         </div>
       </div>
     );
@@ -280,9 +280,9 @@ const WhatsAppClone = () => {
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 bg-white border-r border-gray-200`}>
         {/* Header */}
-        <div className="bg-teal-600 p-4 text-white">
+        <div className="bg-green-600 p-4 text-white">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold">WhatsApp</h1>
+            <h1 className="text-xl font-semibold">NaijaChat</h1>
             <div className="flex gap-4">
               <MoreVertical className="w-5 h-5 cursor-pointer" />
             </div>
@@ -302,8 +302,8 @@ const WhatsAppClone = () => {
 
         {/* New Chats Section */}
         {availableUsers.length > 0 && (
-          <div className="bg-teal-50 p-3">
-            <p className="text-xs text-teal-800 font-semibold mb-2">START NEW CHAT</p>
+          <div className="bg-green-50 p-3">
+            <p className="text-xs text-green-800 font-semibold mb-2">START NEW GIST</p>
             <div className="space-y-1">
               {availableUsers.slice(0, 3).map(user => (
                 <div
@@ -312,7 +312,7 @@ const WhatsAppClone = () => {
                   className="flex items-center gap-2 p-2 hover:bg-white rounded cursor-pointer"
                 >
                   <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center text-lg">
-                    {user.avatar}
+                    <User className="w-5 h-5 text-gray-500" />
                   </div>
                   <span className="text-sm text-gray-700">{user.name}</span>
                 </div>
@@ -383,7 +383,7 @@ const WhatsAppClone = () => {
                 <div>
                   <h2 className="font-semibold text-gray-900">{getChatDisplay(selectedChat).name}</h2>
                   <p className="text-xs text-gray-500">
-                    {isTyping ? 'typing...' : getChatDisplay(selectedChat).online ? 'online' : 'offline'}
+                    {isTyping ? 'dey type...' : getChatDisplay(selectedChat).online ? 'online' : 'offline'}
                   </p>
                 </div>
               </div>
@@ -396,7 +396,7 @@ const WhatsAppClone = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 bg-teal-50">
+            <div className="flex-1 overflow-y-auto p-4 bg-green-50">
               {messages.map(msg => {
                 const isSent = msg.senderId._id === currentUser?.id;
                 return (
@@ -407,25 +407,25 @@ const WhatsAppClone = () => {
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                         isSent
-                          ? 'bg-teal-500 text-white rounded-br-none'
+                          ? 'bg-green-500 text-white rounded-br-none'
                           : 'bg-white text-gray-800 rounded-bl-none'
                       } shadow`}
                     >
                       {selectedChat.isGroup && !isSent && (
-                        <p className="text-xs font-semibold text-teal-600 mb-1">
+                        <p className="text-xs font-semibold text-green-600 mb-1">
                           {msg.senderId.name}
                         </p>
                       )}
                       <p className="break-words">{msg.text}</p>
                       <div className="flex items-center justify-end gap-1 mt-1">
-                        <span className={`text-xs ${isSent ? 'text-teal-100' : 'text-gray-500'}`}>
+                        <span className={`text-xs ${isSent ? 'text-green-100' : 'text-gray-500'}`}>
                           {formatTime(msg.createdAt)}
                         </span>
                         {isSent && (
                           <span>
                             {msg.status === 'read' && <CheckCheck className="w-4 h-4 text-blue-300" />}
-                            {msg.status === 'delivered' && <CheckCheck className="w-4 h-4 text-teal-100" />}
-                            {msg.status === 'sent' && <Check className="w-4 h-4 text-teal-100" />}
+                            {msg.status === 'delivered' && <CheckCheck className="w-4 h-4 text-green-100" />}
+                            {msg.status === 'sent' && <Check className="w-4 h-4 text-green-100" />}
                           </span>
                         )}
                       </div>
@@ -448,17 +448,17 @@ const WhatsAppClone = () => {
                 
                 <input
                   type="text"
-                  placeholder="Type a message"
+                  placeholder="Send message"
                   value={message}
                   onChange={handleTyping}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-teal-500"
+                  className="flex-1 px-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:border-green-500"
                 />
                 
                 {message.trim() ? (
                   <button
                     onClick={handleSendMessage}
-                    className="p-2 bg-teal-500 hover:bg-teal-600 rounded-full"
+                    className="p-2 bg-green-500 hover:bg-green-600 rounded-full"
                   >
                     <Send className="w-6 h-6 text-white" />
                   </button>
@@ -471,12 +471,12 @@ const WhatsAppClone = () => {
             </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-teal-50">
+          <div className="flex-1 flex items-center justify-center bg-green-50">
             <div className="text-center">
-              <div className="w-64 h-64 mx-auto mb-8 rounded-full bg-teal-100 flex items-center justify-center">
-                <span className="text-8xl">💬</span>
+              <div className="w-64 h-64 mx-auto mb-8 rounded-full bg-green-100 flex items-center justify-center">
+                <User className="w-32 h-32 text-gray-400" />
               </div>
-              <h2 className="text-3xl font-light text-gray-600 mb-2">WhatsApp Web</h2>
+              <h2 className="text-3xl font-light text-gray-600 mb-2">NaijaChat</h2>
               <p className="text-gray-500">Select a chat to start messaging</p>
             </div>
           </div>
