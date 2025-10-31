@@ -30,7 +30,11 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  avatar: { type: String, default: '👤' },
+  avatar: {
+    type: String,
+    default: '🇳🇬',
+    enum: ['🇳🇬', '🦅', '🦁', '🌴', '🗿']
+  },
   online: { type: Boolean, default: false },
   lastSeen: { type: Date, default: Date.now }
 });

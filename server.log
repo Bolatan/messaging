@@ -1,8 +1,4 @@
 
-> whatsapp-clone-monorepo@1.0.0 dev:server
-> npm run dev --prefix server
-
-
 > whatsapp-clone-server@1.0.0 dev
 > nodemon server.js
 
