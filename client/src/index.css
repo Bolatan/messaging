@@ -7,3 +7,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+.chat-background {
+  background-image: url('./assets/lagos.jpg');
+  background-size: cover;
+  background-position: center;
+}

@@ -319,6 +319,10 @@ const WhatsAppClone = () => {
     );
   }
 
+  if (!currentUser) {
+    return <RegistrationForm onRegister={handleRegister} />;
+  }
+
   return (
     <div className="flex h-screen" ref={main}>
       {/* Sidebar */}
@@ -440,7 +444,7 @@ const WhatsAppClone = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 bg-green-50">
+            <div className="flex-1 overflow-y-auto p-4 chat-background">
               {messages.map(msg => {
                 const isSent = msg.senderId._id === currentUser?.id;
                 return (
