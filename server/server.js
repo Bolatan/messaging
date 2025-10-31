@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import mongoose from 'mongoose';
@@ -39,67 +40,6 @@ const io = new Server(httpServer, {
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json());
-
-// Static file serving for production
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '..', 'client', 'dist')));
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'client', 'dist', 'index.html'));
-  });
-}
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
-
-// Schemas
-const userSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, unique: true, sparse: true },
-  phoneNumber: { type: String, unique: true, sparse: true },
-  password: { type: String, required: true },
-  avatar: {
-    type: String,
-    default: '🇳🇬',
-    enum: ['🇳🇬', '🦅', '🦁', '🌴', '🗿']
-  },
-  online: { type: Boolean, default: false },
-  lastSeen: { type: Date, default: Date.now }
-});
-
-userSchema.pre('save', function(next) {
-  if (!this.email && !this.phoneNumber) {
-    next(new Error('Either email or phone number is required.'));
-  } else {
-    next();
-  }
-});
-
-const messageSchema = new mongoose.Schema({
-  chatId: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat', required: true },
-  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  text: { type: String, required: true },
-  status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
-  createdAt: { type: Date, default: Date.now }
-});
-
-const chatSchema = new mongoose.Schema({
-  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-  isGroup: { type: Boolean, default: false },
-  groupName: String,
-  groupAvatar: String,
-  lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
-  updatedAt: { type: Date, default: Date.now }
-});
-
-const User = mongoose.model('User', userSchema);
-const Message = mongoose.model('Message', messageSchema);
-const Chat = mongoose.model('Chat', chatSchema);
 
 // REST API Routes
 app.get('/api/health', (req, res) => {
@@ -208,6 +148,73 @@ app.get('/api/users', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// Static file serving for production
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const clientDistPath = path.join(__dirname, '..', 'client', 'dist');
+app.use(express.static(clientDistPath));
+
+app.get('*', (req, res) => {
+  const indexPath = path.join(clientDistPath, 'index.html');
+  fs.access(indexPath, fs.constants.F_OK, (err) => {
+    if (err) {
+      res.status(404).send('index.html not found');
+    } else {
+      res.sendFile(indexPath);
+    }
+  });
+});
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Schemas
+const userSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, unique: true, sparse: true },
+  phoneNumber: { type: String, unique: true, sparse: true },
+  password: { type: String, required: true },
+  avatar: {
+    type: String,
+    default: '🇳🇬',
+    enum: ['🇳🇬', '🦅', '🦁', '🌴', '🗿']
+  },
+  online: { type: Boolean, default: false },
+  lastSeen: { type: Date, default: Date.now }
+});
+
+userSchema.pre('save', function(next) {
+  if (!this.email && !this.phoneNumber) {
+    next(new Error('Either email or phone number is required.'));
+  } else {
+    next();
+  }
+});
+
+const messageSchema = new mongoose.Schema({
+  chatId: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat', required: true },
+  senderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  text: { type: String, required: true },
+  status: { type: String, enum: ['sent', 'delivered', 'read'], default: 'sent' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const chatSchema = new mongoose.Schema({
+  participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  isGroup: { type: Boolean, default: false },
+  groupName: String,
+  groupAvatar: String,
+  lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
+const Message = mongoose.model('Message', messageSchema);
+const Chat = mongoose.model('Chat', chatSchema);
 
 // Socket.IO for real-time messaging
 const onlineUsers = new Map();
