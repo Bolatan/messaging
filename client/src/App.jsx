@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Phone, Video, MoreVertical, Search, Paperclip, Smile, Mic, ArrowLeft, Check, CheckCheck, User, Users } from 'lucide-react';
 import io from 'socket.io-client';
+import WebGLAnimation from './components/WebGLAnimation';
+import { gsap } from 'gsap';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
@@ -224,7 +226,24 @@ const WhatsAppClone = () => {
 
   useEffect(() => {
     scrollToBottom();
+    gsap.from('.message-item', {
+      duration: 0.5,
+      opacity: 0,
+      y: 20,
+      stagger: 0.1,
+      ease: 'power3.out',
+    });
   }, [messages]);
+
+  useEffect(() => {
+    gsap.from('.chat-item', {
+      duration: 0.5,
+      opacity: 0,
+      y: 20,
+      stagger: 0.1,
+      ease: 'power3.out',
+    });
+  }, [filteredChats]);
 
   const getOtherParticipant = (chat) => {
     if (chat.isGroup) return null;
@@ -276,7 +295,8 @@ const WhatsAppClone = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen">
+      <WebGLAnimation />
       {/* Sidebar */}
       <div className={`${selectedChat ? 'hidden md:flex' : 'flex'} flex-col w-full md:w-96 bg-white border-r border-gray-200`}>
         {/* Header */}
@@ -329,7 +349,7 @@ const WhatsAppClone = () => {
               <div
                 key={chat._id}
                 onClick={() => handleSelectChat(chat)}
-                className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 ${
+                className={`chat-item flex items-center gap-3 p-4 cursor-pointer hover:bg-gray-50 ${
                   selectedChat?._id === chat._id ? 'bg-gray-100' : ''
                 }`}
               >
@@ -402,7 +422,7 @@ const WhatsAppClone = () => {
                 return (
                   <div
                     key={msg._id}
-                    className={`flex mb-4 ${isSent ? 'justify-end' : 'justify-start'}`}
+                    className={`message-item flex mb-4 ${isSent ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
